@@ -1,21 +1,25 @@
-# Техническое задание
+# Technical specification
 
-Реализовать простую программу с использованием telegram bot api и aiogram3.x для ведения личных финансов и проведения последующих аналитических исследований.
+Implement a simple program using telegram bot api for personal finance management and subsequent analytical research.
 
-Данные сохраняются в базу данных. Выбор СУБД зависит от собственных предпочтений, в данном случае sqlite3 или postgresql.
+### Dependencies
 
-В директории с проектом должно быть наличие Dockerfile и docker-compose.yml файлов.
+- aiogram3.x
+- postgresql as data base (asyncpg)
+- docker (Dockerfile, docker-compose.yml)
 
-**Требования**:
+### Requirements
 
-- Обеспечение безопасности взаимодействия через требуемый интерфейс. Бот отвечает на входящие апдейты исключительно для указанного id.
+- Implementation of exclusively necessary functionality, without excessive work opportunities such as ORM or inline keyboards.
 
-- Учет производится как расходов, так и доходов.
+- Ensuring the security of interaction through the required interface. The bot responds to incoming updates exclusively for the specified id.
 
-- Обеспечение удобства и скорости внесения изменений в базу.
+- Both expenses and income are accounted for.
 
-- Реализация исключительно необходимого функционала, без избыточных возможностей работы.
+- Ensuring the convenience and speed of making changes to the database.
 
-- Аккуратный и поддерживаемый код и модульная структура проекта.
+- Neat and maintainable code and modular project structure.
 
-- Возможность вычета 10-20 % от доходов в виде суммы, идущей в качестве подушки безопасности.
+- Secure information is stored in environments variables.
+
+- The possibility of deducting 10-20% of income in the form of an amount going as an airbag.

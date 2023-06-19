@@ -5,10 +5,12 @@ description = "app for financial accounting via telegram bot api"
 authors = ["luculliano <vederecento@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "finance_bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+aiogram = {git = "https://github.com/aiogram/aiogram.git", rev = "v3.0.0b7"}
+asyncpg = {git = "https://github.com/MagicStack/asyncpg.git", rev = "v0.27.0"}
+python-dotenv = {git = "https://github.com/theskumar/python-dotenv.git", rev = "v1.0.0"}
 
 
 [build-system]
