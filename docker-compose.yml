@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  db:
+    container_name: mypostgres
+    image: postgres:15.3-alpine3.18
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - 5434:5432
+    volumes:
+      - ../db/:/var/lib/postgresql/data
+      - ./db.sh:/docker-entrypoint-initdb.d/db.sh
+
+  # finance_bot:
+  #   build: ./
+  #   depends_on:
+  #     - db
