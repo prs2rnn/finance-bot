@@ -15,10 +15,10 @@ services:
       - 5434:5432
     volumes:
       - ../db/:/var/lib/postgresql/data
-      - ./db.sh:/docker-entrypoint-initdb.d/db.sh
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
 
-  # finance_bot:
-  #   container_name: myfinance_bot
-  #   build: ./
-  #   depends_on:
-  #     - postgres
+  finance_bot:
+    container_name: myfinance_bot
+    build: ./
+    depends_on:
+      - postgres

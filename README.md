@@ -15,10 +15,10 @@ DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@localhost:5434/
 DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@postgres:5432/{getenv('DB_NAME')}"
 ```
 
-The default way
+The default way use bot
 
 ```shell
-docker-compose up -d
+./db.sh
 ```
 
 Or modify as you want. Note that docker-compose.yml file uses `db.sh` script to init database
