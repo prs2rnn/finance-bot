@@ -1,3 +1,30 @@
+# Installation
+
+Rename `.env.example` to `.env` and fill the variables
+
+```shell
+mv .env.example .env
+```
+
+Change DSN variable in `config_data.py` file depending the way you wish to launch bot
+
+```python
+# localhost
+DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@localhost:5434/{getenv('DB_NAME')}"
+# docker
+DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@postgres:5432/{getenv('DB_NAME')}"
+```
+
+The default way
+
+```shell
+docker-compose up -d
+```
+
+Or modify as you want. Note that docker-compose.yml file uses `db.sh` script to init database
+
+Database volume is being created in `../db/` directory
+
 # Technical specification
 
 Implement a simple program using telegram bot api for personal finance management and subsequent analytical research.
