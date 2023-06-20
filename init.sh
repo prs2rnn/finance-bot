@@ -30,7 +30,7 @@ begin
   end loop;
 end;
 \$\$ language plpgsql;
-select insert_values_from_env('$ALLOWED_TELEGRAM_USER_IDS');" > db.sql
+select insert_values_from_env('$ALLOWED_TELEGRAM_USER_IDS');" > init.sql
 
 sudo docker-compose up -d
-rm db.sql
+rm init.sql
