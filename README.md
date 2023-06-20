@@ -18,12 +18,20 @@ DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@postgres:5432/{
 The default way to use bot
 
 ```shell
-./init.sh
+docker-compose up -d
 ```
 
 Or modify as you want. Note that docker-compose.yml file uses `init.sh` script to init database
 
-Database volume is being created in `/var/lib/docker/volumes` directory as *db*
+Database volume is being created in `/var/lib/docker/volumes` local directory as *db*
+
+# Guideline
+
+The structure of database consists of category tables and object description tables.
+
+It is intended only for one user, that has access from different telegram accounts specified in `.env`.
+
+Enter value as in template shown at */start* command and get response.
 
 # Technical specification
 

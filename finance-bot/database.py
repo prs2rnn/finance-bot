@@ -23,7 +23,7 @@ class Request:
 async def main() -> None:
     """Temporary function to test methods"""
     async with asyncpg.create_pool(DSN) as pool:
-        await Request(pool)._check_user(123456789)
+        print(await Request(pool)._check_user(123456789))
 
 
 if __name__ == "__main__":
