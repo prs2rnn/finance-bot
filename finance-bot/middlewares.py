@@ -1,6 +1,8 @@
+import re
 from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
+from aiogram.filters import BaseFilter
 from aiogram.types import TelegramObject
 from aiogram.types.message import Message
 import asyncpg
@@ -41,3 +43,11 @@ class DbSession(BaseMiddleware):
         async with self.connector.acquire() as connection:
             data["request"] = Request(connection)
             return await handler(event, data)
+
+
+class DeleteRecord(BaseFilter):
+    async def __call__(self, message: Message) -> dict[str, int | str] | None:
+        match = re.fullmatch(r"(/del)_(expense)_(\d+)|(/del)_(income)_\d+",
+                             message.text if message.text else "")
+        if match:
+            return {"table_name": match.group(2), "id_": int(match.group(3))}

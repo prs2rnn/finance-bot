@@ -1,7 +1,7 @@
 import asyncio
 
 import asyncpg
-
+from datetime import datetime
 from config_data import DSN
 
 
@@ -9,21 +9,34 @@ class Request:
     def __init__(self, connector: asyncpg.Pool) -> None:
         self.connector = connector
 
-    async def _check_user(self, id_: int) -> bool:
-        res = await self.connector.fetchrow("select exists (select 1 from users where "
-                                            "telegram_id = $1)", id_)
-        # extract from Record as column named "exists", or res[0] as first column
-        return res["exists"]
+    async def get_categories(self) -> str:
+        res = await self.connector.fetch("select codename, aliases from expense_category")
+        expenses = "\n".join(map(lambda x: f"{x['codename']} ({x['aliases']})", res))
+        res = await self.connector.fetch("select * from income_category")
+        incomes = "\n".join(map(lambda x: f"{x['codename']} ({x['aliases']})", res))
+        return f"{expenses}\n\n{incomes}"
 
-    async def _add_user(self, id_: int, name: str | None) -> None:
-        await self.connector.execute("insert into users(telegram_id, telegram_name) "
-                                     "values ($1, $2)", id_, name)
+    async def get_last_changes(self) -> str:
+        res = await self.connector.fetch("select expense_id as id, amount, codename, "
+                          "created, table_name from (select *, 'expense' as table_name "
+                          "from expense union select *, 'income' as table_name from "
+                          "income order by created desc limit 5) as a order by created asc")
+        changes = "\n".join(map(lambda x: f"{res.index(x) + 1}) "
+                                f"{round(x['amount'], 2)} rub {x['codename']} "
+            f"({datetime.strftime(x['created'], '%d.%m.%Y %H:%M:%S')}) "
+            f"/del_{x['table_name']}_{x['id']}", res))
+        return changes
+
+    async def delete_change(self, table_name: str, id_: int) -> int:
+        res = await self.connector.execute(f"delete from {table_name} where "
+                                     f"{table_name}_id = $1", id_)
+        return int(res.split()[1])
 
 
 async def main() -> None:
     """Temporary function to test methods"""
     async with asyncpg.create_pool(DSN) as pool:
-        print(await Request(pool)._check_user(123456789))
+        print(await Request(pool).delete_change("expense", 6))
 
 
 if __name__ == "__main__":
