@@ -19,7 +19,7 @@ create table if not exists record(
     created timestamptz(3),
     codename varchar(50),
     raw_text text,
-    FOREIGN KEY(codename) REFERENCES expense_category(codename)
+    FOREIGN KEY(codename) REFERENCES category(codename)
 );
 insert into category(codename, aliases, is_expense)
 values
@@ -33,11 +33,11 @@ values
     ('cab', 'такси,taxi,cab', true),
     ('relax', 'прогулка,свидание', true),
     ('clothes', 'шмот,одежда', true),
-    ('gift', 'подарки', true),
+    ('to other', '', true),
     ('car', 'машина,авто,auto', true),
     ('subscription', 'подписка,sub', true),
-    ('other', 'прочее,другое', true);
+    ('other', 'прочее,другое', true),
     ('salary', 'зп', false),
     ('business', 'dividends,extra', false),
-    ('gift', 'from other', false);
+    ('from other', '', false);
 EOF

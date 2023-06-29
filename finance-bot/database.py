@@ -10,11 +10,12 @@ class Request:
         self.connector = connector
 
     async def get_categories(self) -> str:
-        res = await self.connector.fetch("select codename, aliases from expense_category")
-        expenses = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})", res))
-        res = await self.connector.fetch("select * from income_category")
-        incomes = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})", res))
-        return f"{expenses}\n\n{incomes}"
+        res = await self.connector.fetch("select * from category")
+        expenses = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})",
+                                 filter(lambda x: x['is_expense'], res)))
+        incomes = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})",
+                                 filter(lambda x: not x['is_expense'], res)))
+        return f"List of expense category\n{expenses}\n\nList of income category\n{incomes}"
 
     async def get_last_changes(self) -> str:
         res = await self.connector.fetch("select expense_id as id, amount, codename, "
