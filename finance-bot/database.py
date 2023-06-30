@@ -28,8 +28,9 @@ class Request:
                 f"List of income category</b>\n{incomes}")
 
     async def get_last_records(self) -> str:
-        res = await self.connector.fetch("select id, amount, created, codename from record "
-                                         "order by created asc limit 5")
+        res = await self.connector.fetch("select * from (select id, amount, created, "
+                                         "codename from record order by created desc limit 5) "
+                                         "as first order by created asc")
         records = "\n".join(map(lambda x: f"• {round(x['amount'], 1)}₽ for {x['codename']} "
                     f"at {x['created'].date()}. Press /del{x['id']} to delete", res))
         return ("No records found", f"<b>List of last records</b>\n\n{records}")[records != ""]

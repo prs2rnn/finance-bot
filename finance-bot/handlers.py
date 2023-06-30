@@ -21,7 +21,8 @@ async def proceed_start(message: Message) -> None:
 async def proceed_categories(message: Message, request: Request) -> None:
     content = await request.get_categories()
     await message.answer(f"{content}\n\nAdd record: 250 cab\nLast records: /records"
-                         "\n\nWarning: savings are added manually")
+                         "\n\n<b>Warning</b>: savings are added manually and not included "
+                         "in expenses when calculating. Planned savings - 15%")
 
 
 @router.message(Command("records"))
