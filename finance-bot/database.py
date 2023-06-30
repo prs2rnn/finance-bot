@@ -61,7 +61,7 @@ class Request:
         Returns expenses, incomes and savings for period
 
         Params:
-        period  One of the periods: "month", "day"
+        period  One of the periods: "month", "day", "week"
         """
         expenses = await self.connector.fetchrow("select sum(amount) from record join "
                 "category on record.codename = category.codename "
