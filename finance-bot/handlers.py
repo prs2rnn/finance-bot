@@ -33,7 +33,7 @@ async def proceed_records(message: Message, request: Request) -> None:
 
 @router.message(DeleteRecord())
 async def proceed_delete(message: Message, id_: int, request: Request) -> None:
-    is_delete = await request.delete_change(id_)
+    is_delete = await request.delete_record(id_)
     answer = ("<b>No record found so not deleted</b>\n\nLast records: /records",
               "<b>Delete record</b>\n\nAdd record: 250 cab\nLast records: /records\n"
               "Current month: /month")[is_delete]

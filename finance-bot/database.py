@@ -35,7 +35,7 @@ class Request:
                     f"at {x['created'].date()}. Press /del{x['id']} to delete", res))
         return ("No records found", f"<b>List of last records</b>\n\n{records}")[records != ""]
 
-    async def delete_change(self, id_: int) -> int:
+    async def delete_record(self, id_: int) -> int:
         res = await self.connector.execute("delete from record where id = $1", id_)
         return int(res.split()[1])
 
@@ -56,7 +56,7 @@ class Request:
                              "current_timestamp, $2, $3)", amount, codename, raw_text)
         return round(amount, 1), codename
 
-    async def get_statistics(self, period: str = "month"):
+    async def get_statistics(self, period: str = "month") -> Statistics:
         """
         Returns expenses, incomes and savings for period
 
@@ -75,8 +75,10 @@ class Request:
                 "as \"Plan savings\" from record join category on record.codename = "
                 "category.codename where is_expense = false and created > "
                 f"date_trunc('{period}', now())")
-        return Statistics(round(float(expenses[0]), 1), round(float(savings[0]), 1),
-                          round(float(incomes[0]), 1), round(float(incomes[1]), 1))
+        return Statistics(round(float(expenses[0]) if expenses[0] is not None else 0.0, 1),
+                          round(float(savings[0]) if expenses[0] is not None else 0.0, 1),
+                          round(float(incomes[0]) if expenses[0] is not None else 0.0, 1),
+                          round(float(incomes[1] if expenses[0] is not None else 0.0), 1))
 
 
 
@@ -84,7 +86,7 @@ async def main() -> None:
     """Temporary function to test methods"""
     async with asyncpg.create_pool(DSN) as pool:
         # print(await Request(pool).add_record(200, "business", "200 business"))
-        print(await Request(pool).get_last_records())
+        print(await Request(pool).get_statistics())
 
 
 if __name__ == "__main__":
