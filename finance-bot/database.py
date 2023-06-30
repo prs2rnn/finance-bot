@@ -1,7 +1,6 @@
 import asyncio
 
 import asyncpg
-from datetime import datetime
 from config_data import DSN
 
 
@@ -14,34 +13,46 @@ class Request:
         expenses = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})",
                                  filter(lambda x: x['is_expense'], res)))
         incomes = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})",
-                                 filter(lambda x: not x['is_expense'], res)))
-        return f"List of expense category\n{expenses}\n\nList of income category\n{incomes}"
+                                 filter(lambda x: not x['is_expense']
+                                        and x['codename'] != 'savings', res)))
+        return f"<b>List of expense category</b>\n{expenses}\n\n<b>List of income category</b>\n{incomes}"
 
     async def get_last_changes(self) -> str:
-        res = await self.connector.fetch("select expense_id as id, amount, codename, "
-                        "created, table_name from (select *, 'expense' as table_name "
-                        "from expense union select *, 'income' as table_name from "
-                        "income order by created desc limit 5) as a order by created asc")
-        changes = "\n".join(map(lambda x: f"{res.index(x) + 1}) "
-                                f"{round(x['amount'], 1)} rub, {x['codename']}, "
-            f"{datetime.strftime(x['created'], '%d-%m-%y')}\n"
-            f"(/del_{x['table_name']}_{x['id']})", res))
-        return changes
+        res = await self.connector.fetch("select id, created, raw_text from record "
+                                         "order by created asc limit 5")
+        changes = "\n".join(map(lambda x: f"• \"{x['raw_text']}\" "
+                    f"at {x['created'].date()}. Press /del{x['id']} to delete", res))
+        return ("No changes", f"<b>List of last changes</b>\n\n{changes}")[changes != ""]
 
-    async def delete_change(self, table_name: str, id_: int) -> int:
-        res = await self.connector.execute(f"delete from {table_name} where "
-                                           f"{table_name}_id = $1", id_)
+    async def delete_change(self, id_: int) -> int:
+        res = await self.connector.execute("delete from record where id = $1", id_)
         return int(res.split()[1])
 
-    async def add_record(self, amount: float, category: str, raw_text: str) -> None:
-        table_name = ("expense", "income")[amount > 0]
-        await self.connector.execute(f"insert into {table_name} ()")
+    async def _parse_category(self, category: str) -> str | None:
+        res = await self.connector.fetch("select * from category")
+        categories = {x['codename']: x['aliases'].split(",") for x in res}
+        for i in categories:
+            if i == category or category in categories[i]:
+                return i
+
+    async def add_record(self, amount: float, category: str, raw_text: str) -> str | None:
+        codename = await self._parse_category(category)
+        if not codename or amount <= 0:
+            return
+        res = await self.connector.execute("insert into record (amount, created, "
+                    "codename, raw_text) values ($1, current_timestamp, $2, $3)",
+                                           amount, codename, raw_text)
+        return res
+
+
 
 
 async def main() -> None:
     """Temporary function to test methods"""
     async with asyncpg.create_pool(DSN) as pool:
-        print(await Request(pool).get_categories())
+        print(await Request(pool).add_record(100, "22", "100 зп"))
+        print(await Request(pool).get_last_changes())
+        # print(await Request(pool).delete_change(1))
 
 
 if __name__ == "__main__":

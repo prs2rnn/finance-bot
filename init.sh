@@ -14,7 +14,7 @@ create table if not exists category(
     is_expense boolean
 );
 create table if not exists record(
-    expense_id integer primary key generated always as identity,
+    id integer primary key generated always as identity,
     amount numeric(13, 3),
     created timestamptz(3),
     codename varchar(50),
@@ -23,7 +23,7 @@ create table if not exists record(
 );
 insert into category(codename, aliases, is_expense)
 values
-    ('food', 'food,meal,еда,продукты', true),
+    ('food', 'meal,еда,продукты', true),
     ('transport', 'bus,транспорт', true),
     ('pharmacy', 'аптека,лекарства', true),
     ('mobile', 'связь,phone,телефон', true),
@@ -33,11 +33,10 @@ values
     ('cab', 'такси,taxi,cab', true),
     ('relax', 'прогулка,свидание', true),
     ('clothes', 'шмот,одежда', true),
-    ('to other', '', true),
     ('car', 'машина,авто,auto', true),
     ('subscription', 'подписка,sub', true),
     ('other', 'прочее,другое', true),
     ('salary', 'зп', false),
     ('business', 'dividends,extra', false),
-    ('from other', '', false);
+    ('savings', '', false);
 EOF

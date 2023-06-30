@@ -8,7 +8,6 @@ from aiogram.types.message import Message
 import asyncpg
 
 from database import Request
-from vocabulary import VOCABULARY_EN
 
 
 class AccessMiddleware(BaseMiddleware):
@@ -25,7 +24,7 @@ class AccessMiddleware(BaseMiddleware):
     ) -> Any:
         if event.from_user.id in self.allowed_ids:
             return await handler(event, data)
-        await event.answer(VOCABULARY_EN["deny"])
+        await event.answer("Access denied!")
 
 
 class DbSession(BaseMiddleware):
@@ -46,8 +45,18 @@ class DbSession(BaseMiddleware):
 
 
 class DeleteRecord(BaseFilter):
-    async def __call__(self, message: Message) -> dict[str, int | str] | None:
-        match = re.fullmatch(r"(/del)_(expense)_(\d+)|(/del)_(income)_\d+",
+    async def __call__(self, message: Message) -> dict[str, int] | None:
+        match = re.fullmatch(r"(/del)(\d+)",
                              message.text if message.text else "")
         if match:
-            return {"table_name": match.group(2), "id_": int(match.group(3))}
+            return {"id_": int(match.group(2))}
+
+
+class AddRecord(BaseFilter):
+    async def __call__(self, message: Message) -> dict[str, float | str | None] | None:
+        match = re.fullmatch(r"(\d+\.?\d*) ([A-Za-z]+) ?[^\n]*",
+                             message.text if message.text else "")
+        if match:
+            return {"amount": float(match.group(1)),
+                    "category": match.group(2).lower(),
+                    "raw_text": message.text}
