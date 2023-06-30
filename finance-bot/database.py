@@ -76,9 +76,9 @@ class Request:
                 "category.codename where is_expense = false and created > "
                 f"date_trunc('{period}', now())")
         return Statistics(round(float(expenses[0]) if expenses[0] is not None else 0.0, 1),
-                          round(float(savings[0]) if expenses[0] is not None else 0.0, 1),
-                          round(float(incomes[0]) if expenses[0] is not None else 0.0, 1),
-                          round(float(incomes[1] if expenses[0] is not None else 0.0), 1))
+                          round(float(savings[0]) if savings[0] is not None else 0.0, 1),
+                          round(float(incomes[0]) if incomes[0] is not None else 0.0, 1),
+                          round(float(incomes[1] if incomes[1] is not None else 0.0), 1))
 
 
 

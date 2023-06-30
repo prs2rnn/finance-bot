@@ -21,6 +21,7 @@ async def proceed_start(message: Message) -> None:
 async def proceed_categories(message: Message, request: Request) -> None:
     content = await request.get_categories()
     await message.answer(f"{content}\n\nAdd record: 250 cab\nLast records: /records"
+                         "\nCurrent month: /month"
                          "\n\n<b>Warning</b>: savings are added manually and not included "
                          "in expenses when calculating. Planned savings - 15%")
 
@@ -28,7 +29,8 @@ async def proceed_categories(message: Message, request: Request) -> None:
 @router.message(Command("records"))
 async def proceed_records(message: Message, request: Request) -> None:
     content = await request.get_last_records()
-    await message.answer(f"{content}\n\nAdd record: 250 cab\nCategories: /categories")
+    await message.answer(f"{content}\n\nAdd record: 250 cab\nCategories: /categories"
+                         "\nCurrent month: /month")
 
 
 @router.message(DeleteRecord())
