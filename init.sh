@@ -23,20 +23,20 @@ create table if not exists record(
 );
 insert into category(codename, aliases, is_expense)
 values
-    ('food', 'meal,еда,продукты', true),
-    ('transport', 'bus,транспорт', true),
-    ('pharmacy', 'аптека,лекарства', true),
-    ('mobile', 'связь,phone,телефон', true),
-    ('internet', 'инет,inet', true),
-    ('barber', 'hair,стрижка,барбер', true),
-    ('lunch', 'ланч,столовая,ресторан,кафе,cafe', true),
-    ('cab', 'такси,taxi,cab', true),
-    ('relax', 'прогулка,свидание', true),
-    ('clothes', 'шмот,одежда', true),
-    ('car', 'машина,авто,auto', true),
-    ('subscription', 'подписка,sub', true),
-    ('other', 'прочее,другое', true),
+    ('food', 'meal, еда, продукты', true),
+    ('transport', 'bus, транспорт', true),
+    ('pharmacy', 'аптека, лекарства', true),
+    ('mobile', 'связь, phone, телефон', true),
+    ('internet', 'инет, inet', true),
+    ('barber', 'hair, стрижка, барбер', true),
+    ('lunch', 'ланч, столовая, ресторан,кафе,cafe', true),
+    ('cab', 'такси, taxi, cab', true),
+    ('relax', 'прогулка, свидание', true),
+    ('clothes', 'шмот, одежда', true),
+    ('car', 'машина, авто, auto', true),
+    ('subscription', 'подписка, sub', true),
+    ('other', 'прочее, другое', true),
     ('salary', 'зп', false),
-    ('business', 'dividends,extra', false),
-    ('savings', '', false);
+    ('business', 'dividends, extra', false),
+    ('savings', 'подушка,save', true);
 EOF

@@ -14,37 +14,60 @@ async def proceed_start(message: Message) -> None:
                          "Add record: 250 cab\n"
                          "Categories: /categories\n"
                          "Current month: /month\n"
-                         "Last changes: /changes")
+                         "Last records: /records")
 
 
 @router.message(Command("categories"))
 async def proceed_categories(message: Message, request: Request) -> None:
     content = await request.get_categories()
-    await message.answer(f"{content}\n\nAdd record: 250 cab\nLast changes: /changes")
+    await message.answer(f"{content}\n\nAdd record: 250 cab\nLast records: /records"
+                         "\n\nWarning: savings are added manually")
 
 
-@router.message(Command("changes"))
-async def proceed_changes(message: Message, request: Request) -> None:
-    content = await request.get_last_changes()
+@router.message(Command("records"))
+async def proceed_records(message: Message, request: Request) -> None:
+    content = await request.get_last_records()
     await message.answer(f"{content}\n\nAdd record: 250 cab\nCategories: /categories")
 
 
 @router.message(DeleteRecord())
 async def proceed_delete(message: Message, id_: int, request: Request) -> None:
     is_delete = await request.delete_change(id_)
-    answer = ("<b>No record found so not deleted</b>\n\nLast changes: /changes",
-              "<b>Record has been deleted</b>\n\nLast changes: /changes")[is_delete]
+    answer = ("<b>No record found so not deleted</b>\n\nLast records: /records",
+              "<b>Delete record</b>\n\nAdd record: 250 cab\nLast records: /records\n"
+              "Current month: /month")[is_delete]
     await message.answer(answer)
 
 
 @router.message(AddRecord())
-async def proceed_record(message: Message, amount: float,
-                         category: str, raw_text: str, request: Request) -> None:
+async def proceed_record(message: Message, amount: float, category: str,
+                         raw_text: str, request: Request) -> None | Message:
     res = await request.add_record(amount, category, raw_text)
-    answer = ("False", "True")[1 if res else 0]
-    await message.answer(answer)
+    if not res:
+        return await message.answer(
+         "<b>Not recognized</b>\n\nTo add record: 250 cab\nOr use /help for help")
+    amount, codename = res
+    statistics = await request.get_statistics("day")
+    await message.answer(
+        f"Add new record: {round(amount, 1)}₽ for {codename}\n\n"
+        f"Today statistics:\nExpenses\t{statistics.expenses}₽\nIncomes\t"
+        f"{statistics.incomes}₽\nSavings\t{statistics.savings}₽ from planned "
+        f"{statistics.plan_savings}₽\n\n"
+        f"Current month: /month\nLast records: /records\nCategories: /categories"
+)
+
+
+@router.message(Command("month"))
+async def proceed_month(message: Message, request: Request) -> None:
+    statistics = await request.get_statistics()
+    await message.answer(f"<b>Month statistics</b>\n\nExpenses\t{statistics.expenses}₽"
+        f"\nIncomes\t{statistics.incomes}₽\n"
+        f"Savings\t{statistics.savings}₽ from planned {statistics.plan_savings}₽"
+        "\n\nAdd record: 250 bus\nCategories: /categories\nLast records: /records"
+)
 
 
 @router.message()
 async def proceed_other(message: Message) -> None:
-    await message.answer("<b>Not recognized</b>\n\nTo add record: 250 cab\nOr use /help for help")
+    await message.answer(
+        "<b>Not recognized</b>\n\nAdd record: 250 cab\nOr use /help for help")

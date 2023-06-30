@@ -54,7 +54,7 @@ class DeleteRecord(BaseFilter):
 
 class AddRecord(BaseFilter):
     async def __call__(self, message: Message) -> dict[str, float | str | None] | None:
-        match = re.fullmatch(r"(\d+\.?\d*) ([A-Za-z]+) ?[^\n]*",
+        match = re.fullmatch(r"(\d+\.?\d*) ([A-Za-zА-Яа-я]+) ?[^\n]*",
                              message.text if message.text else "")
         if match:
             return {"amount": float(match.group(1)),
