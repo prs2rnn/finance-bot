@@ -1,0 +1,2 @@
+# Run the notify.py module at 23:58 on each Sunday
+58 23 * * 0 cd /finance-bot && poetry run python finance-bot/notify.py >> /var/log/cron.log 2>&1

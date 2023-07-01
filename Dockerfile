@@ -9,7 +9,7 @@ ENV \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_NO_INTERACTION=1
 
-RUN apk add --update curl libc-dev gcc
+RUN apk add --update curl libc-dev gcc openrc
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="$POETRY_HOME/bin:$PATH"
 
@@ -19,4 +19,9 @@ COPY . /finance-bot
 
 RUN poetry install
 
-CMD [ "poetry", "run", "python", "finance-bot/bot.py" ]
+ADD crontab /etc/cron.d/finance-bot-cron
+RUN chmod 0644 /etc/cron.d/finance-bot-cron
+RUN crontab /etc/cron.d/finance-bot-cron
+RUN touch /var/log/cron.log
+
+CMD ["sh", "-c", "crond && poetry run python finance-bot/bot.py"]

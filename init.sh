@@ -38,5 +38,5 @@ values
     ('other', 'прочее, другое', true),
     ('salary', 'зп', false),
     ('business', 'dividends, extra', false),
-    ('savings', 'подушка,save', true);
+    ('savings', 'подушка, save', true);
 EOF
