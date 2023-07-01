@@ -4,7 +4,7 @@ from typing import NamedTuple
 import asyncpg
 
 from config_data import DSN
-
+from vocabulary import VOCABULARY
 
 class Statistics(NamedTuple):
     expenses: float
@@ -19,21 +19,24 @@ class Request:
 
     async def get_categories(self) -> str:
         res = await self.connector.fetch("select * from category")
-        expenses = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})",
+        expenses = "\n".join(map(lambda x: VOCABULARY["db_category"].format(
+                                codename=x["codename"], aliases=x["aliases"]),
                                  filter(lambda x: x['is_expense'], res)))
-        incomes = "\n".join(map(lambda x: f"• {x['codename']} ({x['aliases']})",
+        incomes = "\n".join(map(lambda x: VOCABULARY["db_category"].format(
+                                codename=x["codename"], aliases=x["aliases"]),
                                  filter(lambda x: not x['is_expense']
                                         and x['codename'] != 'savings', res)))
-        return (f"<b>List of expense category</b>\n{expenses}\n\n<b>"
-                f"List of income category</b>\n{incomes}")
+        return VOCABULARY["db_categories"].format(expenses=expenses, incomes=incomes)
 
     async def get_last_records(self) -> str:
         res = await self.connector.fetch("select * from (select id, amount, created, "
                                          "codename from record order by created desc limit 5) "
                                          "as first order by created asc")
-        records = "\n".join(map(lambda x: f"• {round(x['amount'], 1)}₽ for {x['codename']} "
-                    f"at {x['created'].date()}. Press /del{x['id']} to delete", res))
-        return ("No records found", f"<b>List of last records</b>\n\n{records}")[records != ""]
+        records = "\n".join(map(lambda x: VOCABULARY["db_records"].format(
+                            amount=round(x["amount"], 1), codename=x["codename"],
+                            created=x["created"].date(), id_=x["id"]), res))
+        return (VOCABULARY["db_records_false"],
+                VOCABULARY["db_records_true"].format(records=records))[records != ""]
 
     async def delete_record(self, id_: int) -> int:
         res = await self.connector.execute("delete from record where id = $1", id_)
