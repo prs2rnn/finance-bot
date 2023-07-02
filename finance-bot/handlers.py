@@ -40,19 +40,19 @@ async def proceed_record(message: Message, amount: float, category: str,
     if not res:
         return await message.answer(VOCABULARY["other"])
     amount, codename = res
-    cur, prev = await request.get_statistics("day")
+    statisics = await request.get_statistics("day")
     await message.answer(VOCABULARY["add_record"].format(
             codename=codename, amount=round(amount, 1),
-            expenses=cur.expenses, incomes=cur.incomes,
-            savings=cur.savings, plan_savings=cur.plan_savings))
+            expenses=statisics.expenses, incomes=statisics.incomes,
+            savings=statisics.savings, plan_savings=statisics.plan_savings))
 
 
 @router.message(Command("month"))
 async def proceed_month(message: Message, request: Request) -> None:
-    cur, prev = await request.get_statistics()
+    statisics = await request.get_statistics()
     await message.answer(VOCABULARY["month"].format(
-            expenses=cur.expenses, incomes=cur.incomes,
-            savings=cur.savings, plan_savings=cur.plan_savings))
+            expenses=statisics.expenses, incomes=statisics.incomes,
+            savings=statisics.savings, plan_savings=statisics.plan_savings))
 
 
 @router.message()

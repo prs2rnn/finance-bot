@@ -60,9 +60,24 @@ class Request:
                              "current_timestamp, $2, $3)", amount, codename, raw_text)
         return round(amount, 1), codename
 
-    async def get_statistics(self, period: str = "month") -> list[Statistics]:
+    async def get_statistics(self, period: str = "month") -> Statistics:
         """
         Returns expenses, incomes and savings for period
+
+        Params:
+        period  One of the periods: "month", "day", "week", "year"
+        """
+        res = await self.connector.fetchrow(SQL_STATISTICS_CUR.format(period=period))
+        if res is not None:
+            statistics = Statistics(*(round(float(col) if col is not None
+                                                else 0.0, 1) for col in period))
+        else:
+            statistics = Statistics(0.0, 0.0, 0.0, 0.0)
+        return statistics
+
+    async def get_full_statistics(self, period: str = "month") -> list[Statistics]:
+        """
+        Returns expenses, incomes and savings for period as list
 
         Params:
         period  One of the periods: "month", "day", "week", "year"
