@@ -70,7 +70,7 @@ class Request:
         res = await self.connector.fetchrow(SQL_STATISTICS_CUR.format(period=period))
         if res is not None:
             statistics = Statistics(*(round(float(col) if col is not None
-                                                else 0.0, 1) for col in period))
+                                                else 0.0, 1) for col in res))
         else:
             statistics = Statistics(0.0, 0.0, 0.0, 0.0)
         return statistics
