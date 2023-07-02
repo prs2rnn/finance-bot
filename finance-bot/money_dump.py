@@ -1,9 +1,12 @@
+import asyncio
 import csv
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable
-from config_data import DSN
+
 import asyncpg
+
+from config_data import DSN
 
 path = Path(__file__).parent.joinpath("MoneyOK.csv")
 
@@ -45,16 +48,21 @@ def parse_csv(rows: csv.DictReader) -> Iterable[dict[str, Any]]:
     return values
 
 
-def load_csv() -> Iterable[dict[str, Any]]:
+async def import_db(data: Iterable[dict[str, Any]]) -> None:
+    async with asyncpg.create_pool(DSN) as pool:
+        tasks = (asyncio.create_task(pool.execute("insert into record (created, "
+            "amount, codename, raw_text) values ($1, $2, $3, $4)", *raw.values()))
+            for raw in data)
+        await asyncio.gather(*tasks)
+
+
+async def main() -> None:
     with open(path, encoding="utf-8") as file:
         reader = csv.DictReader(file, delimiter="	")
-        return parse_csv(reader)
-
-
-async def import_csv(data: Iterable[dict[str, Any]]) -> None:
-    async with asyncpg.create_pool(DSN) as pool:
-        await pool.execute("insert into record")
+        data = parse_csv(reader)
+        await import_db(data)
+        print("Done!")
 
 
 if __name__ == "__main__":
-    load_csv()
+    asyncio.run(main())
