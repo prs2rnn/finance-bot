@@ -20,7 +20,7 @@ def save_to_csv(cols: list[str], data: list[dict[str, Any]]) -> None:
         writer.writerows(data)
 
 
-async def backup_db() -> Statistics:
+async def backup_db() -> list[Statistics]:
     async with asyncpg.create_pool(DSN) as pool:
         res = await pool.fetch("select * from record")
         cols = list(res[0].keys())
@@ -45,10 +45,10 @@ async def notify(client: httpx.AsyncClient, id_: str, text: str) -> None:
 
 
 async def main() -> None:
-    statistics = await backup_db()
+    cur, prev = await backup_db()
     text = VOCABULARY["notify_week"].format(
-            expenses=statistics.expenses, incomes=statistics.incomes,
-            savings=statistics.savings, plan_savings=statistics.plan_savings)
+            expenses=cur.expenses, incomes=cur.incomes,
+            savings=cur.savings, plan_savings=cur.plan_savings)
     async with httpx.AsyncClient() as client:
         tasks = (asyncio.create_task(notify(client, id_, text))
                  for id_ in ALLOWED_TELEGRAM_USER_IDS.split(","))

@@ -4,12 +4,13 @@ from typing import NamedTuple
 import asyncpg
 
 from config_data import DSN
-from vocabulary import VOCABULARY
+from vocabulary import SQL_STATISTICS_CUR, SQL_STATISTICS_PREV, VOCABULARY
+
 
 class Statistics(NamedTuple):
     expenses: float
-    savings: float
     incomes: float
+    savings: float
     plan_savings: float
 
 
@@ -59,30 +60,24 @@ class Request:
                              "current_timestamp, $2, $3)", amount, codename, raw_text)
         return round(amount, 1), codename
 
-    async def get_statistics(self, period: str = "month") -> Statistics:
+    async def get_statistics(self, period: str = "month") -> list[Statistics]:
         """
         Returns expenses, incomes and savings for period
 
         Params:
-        period  One of the periods: "month", "day", "week"
+        period  One of the periods: "month", "day", "week", "year"
         """
-        expenses = await self.connector.fetchrow("select sum(amount) from record join "
-                "category on record.codename = category.codename "
-                "where is_expense = true and created >= "
-               f"date_trunc('{period}', now()) and record.codename <> 'savings'")
-        savings = await self.connector.fetchrow("select sum(amount) from record join "
-                "category on record.codename = category.codename "
-                "where is_expense = true and created >= "
-               f"date_trunc('{period}', now()) and record.codename = 'savings'")
-        incomes = await self.connector.fetchrow("select sum(amount), sum(amount) * 0.15 "
-                "as \"Plan savings\" from record join category on record.codename = "
-                "category.codename where is_expense = false and created >= "
-                f"date_trunc('{period}', now())")
-        return Statistics(round(float(expenses[0]) if expenses[0] is not None else 0.0, 1),
-                          round(float(savings[0]) if savings[0] is not None else 0.0, 1),
-                          round(float(incomes[0]) if incomes[0] is not None else 0.0, 1),
-                          round(float(incomes[1] if incomes[1] is not None else 0.0), 1))
-
+        res = (await self.connector.fetchrow(SQL_STATISTICS_CUR.format(period=period)),
+              await self.connector.fetchrow(SQL_STATISTICS_PREV.format(period=period)))
+        data = []
+        for period in res:
+            if period is not None:
+                statistics = Statistics(*(round(float(col) if col is not None
+                                                else 0.0, 1) for col in period))
+            else:
+                statistics = Statistics(0.0, 0.0, 0.0, 0.0)
+            data.append(statistics)
+        return data
 
 
 async def main() -> None:

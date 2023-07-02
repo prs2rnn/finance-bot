@@ -35,4 +35,54 @@ VOCABULARY = {
     "db_categories": "<b>List of expense category</b>\n{expenses}\n\n<b>"
                      "List of income category</b>\n{incomes}",
     "db_category": "• {codename} ({aliases})",
+    "year": "",
 }
+
+SQL_STATISTICS_CUR = """
+select expenses, incomes, savings, incomes * 0.15 as planned_savings from
+(select to_char(created, '{period}') as {period}_, sum(amount) as savings from record r
+	join category c on r.codename = c.codename
+	where created >= date_trunc('{period}', now()) and r.codename = 'savings'
+	group by {period}_) as savings
+full join
+(select to_char(created, '{period}') as {period}_, sum(amount) as incomes from record r
+	join category c on r.codename = c.codename
+	where created >= date_trunc('{period}', now())
+	and is_expense = false
+	group by {period}_) as planned_savings
+using({period}_)
+full join
+(select to_char(created, '{period}') as {period}_, sum(amount) as expenses from record r
+	join category c on r.codename = c.codename
+	where created >= date_trunc('{period}', now()) and is_expense = true
+	and r.codename <> 'savings'
+	group by {period}_) as expenses
+using({period}_);
+"""
+
+
+SQL_STATISTICS_PREV = """
+select expenses, incomes, savings, incomes * 0.15 as planned_savings from
+(select extract({period} from created) as {period}_, sum(amount) as savings from record r
+	join category c on r.codename = c.codename
+	where created >= date_trunc('{period}', now()) - interval '1 {period}'
+    and created < date_trunc('{period}', now())
+    and r.codename = 'savings'
+	group by {period}_) as savings
+full join
+(select extract({period} from created) as {period}_, sum(amount) as incomes from record r
+	join category c on r.codename = c.codename
+	where created >= date_trunc('{period}', now()) - interval '1 {period}'
+    and created < date_trunc('{period}', now())
+	and is_expense = false
+	group by {period}_) as planned_savings
+using({period}_)
+full join
+(select extract({period} from created) as {period}_, sum(amount) as expenses from record r
+	join category c on r.codename = c.codename
+	where created >= date_trunc('{period}', now()) - interval '1 {period}'
+    and created < date_trunc('{period}', now())
+    and is_expense = true and r.codename <> 'savings'
+	group by {period}_) as expenses
+using({period}_);
+"""
