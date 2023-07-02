@@ -68,15 +68,15 @@ class Request:
         """
         expenses = await self.connector.fetchrow("select sum(amount) from record join "
                 "category on record.codename = category.codename "
-                "where is_expense = true and created > "
+                "where is_expense = true and created >= "
                f"date_trunc('{period}', now()) and record.codename <> 'savings'")
         savings = await self.connector.fetchrow("select sum(amount) from record join "
                 "category on record.codename = category.codename "
-                "where is_expense = true and created > "
+                "where is_expense = true and created >= "
                f"date_trunc('{period}', now()) and record.codename = 'savings'")
         incomes = await self.connector.fetchrow("select sum(amount), sum(amount) * 0.15 "
                 "as \"Plan savings\" from record join category on record.codename = "
-                "category.codename where is_expense = false and created > "
+                "category.codename where is_expense = false and created >= "
                 f"date_trunc('{period}', now())")
         return Statistics(round(float(expenses[0]) if expenses[0] is not None else 0.0, 1),
                           round(float(savings[0]) if savings[0] is not None else 0.0, 1),
