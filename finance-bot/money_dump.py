@@ -21,7 +21,7 @@ def parse_csv(rows: csv.DictReader) -> Iterable[dict[str, Any]]:
     values = ({cols[k]: v for k, v in row.items() if k in cols} for row in rows)
     values = ({k: datetime.strptime(row[k], "%Y.%m.%d") if k == "created" else row[k]
         for k in row}for row in values)
-    values = ({k: float(row[k]) if k == "amount" else row[k] for k in row}  # pyright: ignore
+    values = ({k: abs(float(row[k])) if k == "amount" else row[k] for k in row}  # pyright: ignore
              for row in values)
     codenames = {
         "From others": "business",
