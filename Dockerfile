@@ -1,5 +1,7 @@
 FROM python:3.11.3-alpine3.18
 
+ENV TZ Europe/Moscow
+
 ENV \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
