@@ -39,6 +39,7 @@ VOCABULARY = {
     "db_categories": "<b>List of expense category</b>\n{expenses}\n\n<b>"
                      "List of income category</b>\n{incomes}",
     "db_category": "• {codename} ({aliases})",
+    "deny": "Access denied!"
 }
 
 SQL_STATISTICS_CUR = """

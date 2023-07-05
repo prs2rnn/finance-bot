@@ -8,6 +8,7 @@ from aiogram.types.message import Message
 import asyncpg
 
 from database import Request
+from vocabulary import VOCABULARY
 
 
 class DbSession(BaseMiddleware):
@@ -39,12 +40,13 @@ class AccessMiddleware(BaseMiddleware):
         event: Message,
         data: dict[str, Any],
     ) -> Any:
-        if event.from_user.id in self.allowed_ids:
-            return await handler(event, data)
         request = data["request"]
         is_created = await request.add_user_data(
             event.from_user.id,event.from_user.full_name, event.from_user.username)  # pyright: ignore
-        if is_created: await event.answer("Access denied!")
+        if event.from_user.id in self.allowed_ids:
+            return await handler(event, data)
+        if is_created and event.from_user.id not in self.allowed_ids:
+            await event.answer(VOCABULARY["deny"])
 
 
 class DeleteRecord(BaseFilter):
