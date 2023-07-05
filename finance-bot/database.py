@@ -4,7 +4,7 @@ from typing import NamedTuple
 import asyncpg
 
 from config_data import DSN
-from vocabulary import SQL_STATISTICS_CUR, SQL_STATISTICS_PREV, VOCABULARY
+from vocabulary import SQL_STATISTICS_CUR, VOCABULARY
 
 
 class Statistics(NamedTuple):
@@ -75,31 +75,25 @@ class Request:
             statistics = Statistics(0.0, 0.0, 0.0, 0.0)
         return statistics
 
-    async def get_full_statistics(self, period: str = "month") -> list[Statistics]:
-        """
-        Returns expenses, incomes and savings for period as list
+    async def add_user_data(self, id_: int, full_name: str,
+                            username: str | None) -> None | str:
+        is_exists = await self.connector.fetchrow("select exists(select 1 from "
+                                    "telegram_users where telegram_id = $1)", id_)
+        if not is_exists[0]:
+            return await self.connector.execute("insert into telegram_users(telegram_id, "
+              "telegram_full_name, telegram_username, request_amount, latest_access) "
+              "values ($1, $2, $3, $4, current_timestamp)", id_, full_name, username, 1)
+        await self.connector.execute("update telegram_users set request_amount = "
+                        "request_amount + 1, latest_access = current_timestamp;")
 
-        Params:
-        period  One of the periods: "month", "day", "week", "year"
-        """
-        res = (await self.connector.fetchrow(SQL_STATISTICS_CUR.format(period=period)),
-              await self.connector.fetchrow(SQL_STATISTICS_PREV.format(period=period)))
-        data = []
-        for period in res:
-            if period is not None:
-                statistics = Statistics(*(round(float(col) if col is not None
-                                                else 0.0, 1) for col in period))
-            else:
-                statistics = Statistics(0.0, 0.0, 0.0, 0.0)
-            data.append(statistics)
-        return data
+
 
 
 async def main() -> None:
     """Temporary function to test methods"""
     async with asyncpg.create_pool(DSN) as pool:
         # print(await Request(pool).add_record(200, "business", "200 business"))
-        print(await Request(pool).get_statistics())
+        print(await Request(pool).add_user_data(123454, "qwe", "asd"))
 
 
 if __name__ == "__main__":

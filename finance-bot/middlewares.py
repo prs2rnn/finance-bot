@@ -10,23 +10,6 @@ import asyncpg
 from database import Request
 
 
-class AccessMiddleware(BaseMiddleware):
-    """Authentication to use bot for incoming user"""
-
-    def __init__(self, allowed_ids: str) -> None:
-        self.allowed_ids = list(map(int, allowed_ids.split(",")))
-
-    async def __call__(
-        self,
-        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
-        event: Message,
-        data: dict[str, Any],
-    ) -> Any:
-        if event.from_user.id in self.allowed_ids:
-            return await handler(event, data)
-        await event.answer("Access denied!")
-
-
 class DbSession(BaseMiddleware):
     """Establishes database connection for incoming updates"""
 
@@ -42,6 +25,26 @@ class DbSession(BaseMiddleware):
         async with self.connector.acquire() as connection:
             data["request"] = Request(connection)
             return await handler(event, data)
+
+
+class AccessMiddleware(BaseMiddleware):
+    """Authentication to use bot for incoming user"""
+
+    def __init__(self, allowed_ids: str) -> None:
+        self.allowed_ids = list(map(int, allowed_ids.split(",")))
+
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+        event: Message,
+        data: dict[str, Any],
+    ) -> Any:
+        if event.from_user.id in self.allowed_ids:
+            return await handler(event, data)
+        request = data["request"]
+        is_created = await request.add_user_data(
+            event.from_user.id,event.from_user.full_name, event.from_user.username)  # pyright: ignore
+        if is_created: await event.answer("Access denied!")
 
 
 class DeleteRecord(BaseFilter):

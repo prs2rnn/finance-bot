@@ -41,7 +41,7 @@ $$
 		where created >= date_trunc(period_, now())
 		group by r.codename order by sum_ desc;
 $$ language sql;
-select * from get_expenses_by_category('week');
+select * from get_statistics_by_category('week');
 
 -----------------------------------------------------------------------------------------
 

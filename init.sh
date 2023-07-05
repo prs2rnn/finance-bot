@@ -41,4 +41,10 @@ values
     ('salary', 'зп', false),
     ('business', 'dividends, extra', false),
     ('savings', 'подушка, save', true);
+create table telegram_users(
+    telegram_id bigint primary key,
+    telegram_full_name varchar(50),
+    telegram_username varchar(50),
+    request_amount bigint,
+    latest_access timestamptz(3));
 EOF

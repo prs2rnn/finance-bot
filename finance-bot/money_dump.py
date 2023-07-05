@@ -1,3 +1,4 @@
+"""I used this script to import own expenses from MoneyOK IOS app"""
 import asyncio
 import csv
 from datetime import datetime

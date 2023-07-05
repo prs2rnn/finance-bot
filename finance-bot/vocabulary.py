@@ -25,7 +25,7 @@ VOCABULARY = {
     "month": f"<b>Month statistics for {datetime.now(ZoneInfo('Europe/Moscow')).strftime('%B')}</b>\n\n"
              "Expenses\t{expenses}₽\nIncomes\t{incomes}₽\n"
              "Savings\t{savings}₽ from planned {plan_savings}₽"
-             "\n\nAdd record: 250 bus\nCategories: /categories\nLast records: /records",
+             "\n\nAdd record: 250 cab\nCategories: /categories\nLast records: /records",
     "records": "{content}\n\nAdd record: 250 cab\nCategories: /categories"
                "\nCurrent month: /month",
     "add_record": "<b>Add new record</b>: {amount}₽ for {codename}\n\n"
