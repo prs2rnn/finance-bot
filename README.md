@@ -27,7 +27,7 @@ Database volume is being created in `/var/lib/docker/volumes` local directory as
 
 # Guideline
 
-The structure of database consists of category tables and object description tables.
+The structure of database consists of category table and record table.
 
 It is intended only for one user, that has access from different telegram accounts specified in `.env`.
 
