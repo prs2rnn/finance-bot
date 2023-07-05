@@ -76,7 +76,7 @@ class Request:
         incomes = float(reduce(add, incomes)) if incomes else 0.0
         savings = [x["sum_"] for x in res if x["codename"] == "savings"]
         savings = float(reduce(add, savings)) if savings else 0.0
-        planned_savings = incomes * 0.15
+        planned_savings = round(incomes * 0.15, 2)
         categories = "\n".join(map(lambda x:
                                 f"{x['codename']}: {round(x['sum_'], 2)}₽", res))
         return Statistics(expenses, incomes, savings, planned_savings), categories
