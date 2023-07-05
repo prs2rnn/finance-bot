@@ -1,17 +1,19 @@
 import asyncio
+from functools import reduce
+from operator import add
 from typing import NamedTuple
 
 import asyncpg
 
 from config_data import DSN
-from vocabulary import SQL_STATISTICS_CUR, VOCABULARY
+from vocabulary import VOCABULARY
 
 
 class Statistics(NamedTuple):
     expenses: float
     incomes: float
     savings: float
-    plan_savings: float
+    planned_savings: float
 
 
 class Request:
@@ -60,40 +62,31 @@ class Request:
                              "current_timestamp, $2, $3)", amount, codename, raw_text)
         return round(amount, 1), codename
 
-    async def get_statistics(self, period: str = "month") -> Statistics:
+    async def get_statistics(self, period: str = "month") -> tuple[Statistics, str]:
         """
-        Returns expenses, incomes and savings for period
+        Returns expenses, incomes and savings for period and categories
 
         Params:
         period  One of the periods: "month", "day", "week", "year"
         """
-        res = await self.connector.fetchrow(SQL_STATISTICS_CUR.format(period=period))
-        if res is not None:
-            statistics = Statistics(*(round(float(col) if col is not None
-                                                else 0.0, 1) for col in res))
-        else:
-            statistics = Statistics(0.0, 0.0, 0.0, 0.0)
-        return statistics
-
-    async def add_user_data(self, id_: int, full_name: str,
-                            username: str | None) -> None | str:
-        is_exists = await self.connector.fetchrow("select exists(select 1 from "
-                                    "telegram_users where telegram_id = $1)", id_)
-        if not is_exists[0]:
-            return await self.connector.execute("insert into telegram_users(telegram_id, "
-              "telegram_full_name, telegram_username, request_amount, latest_access) "
-              "values ($1, $2, $3, $4, current_timestamp)", id_, full_name, username, 1)
-        await self.connector.execute("update telegram_users set request_amount = "
-                        "request_amount + 1, latest_access = current_timestamp;")
-
-
+        res = await self.connector.fetch(f"select * from get_statistics_by_category('{period}')")
+        expenses = [x["sum_"] for x in res if x["is_expense"] and x["codename"] != "savings"]
+        expenses = float(reduce(add, expenses)) if expenses else 0.0
+        incomes = [x["sum_"] for x in res if not x["is_expense"]]
+        incomes = float(reduce(add, incomes)) if incomes else 0.0
+        savings = [x["sum_"] for x in res if x["codename"] == "savings"]
+        savings = float(reduce(add, savings)) if savings else 0.0
+        planned_savings = incomes * 0.15
+        categories = "\n".join(map(lambda x:
+                                f"{x['codename']}: {round(x['sum_'], 2)}₽", res))
+        return Statistics(expenses, incomes, savings, planned_savings), categories
 
 
 async def main() -> None:
     """Temporary function to test methods"""
     async with asyncpg.create_pool(DSN) as pool:
-        # print(await Request(pool).add_record(200, "business", "200 business"))
-        print(await Request(pool).add_user_data(123454, "qwe", "asd"))
+        # print(await Request(pool).add_record(400, "savings", "200 business"))
+        print(await Request(pool).get_statistics())
 
 
 if __name__ == "__main__":
