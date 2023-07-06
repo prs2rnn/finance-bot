@@ -47,4 +47,13 @@ create table telegram_users(
     telegram_username varchar(50),
     request_amount bigint,
     latest_access timestamptz(3));
+create or replace function get_statistics_by_category(period_ varchar default 'month')
+	returns table(codename varchar, is_expense boolean, sum_ numeric)
+	as
+\$\$
+	select r.codename, is_expense, sum(amount) as sum_ from record r
+		join category c on r.codename = c.codename
+		where created >= date_trunc(period_, now())
+		group by r.codename, is_expense order by sum_ desc;
+\$\$ language sql;
 EOF

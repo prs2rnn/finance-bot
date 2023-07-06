@@ -33,13 +33,13 @@ select * from get_statistics('day');
 -- returns stitstics by all categories in specified period: week, day, month, year
 -- or none, i.e. 0 rows
 create or replace function get_statistics_by_category(period_ varchar default 'month')
-	returns table(codename varchar, sum_ numeric)
+	returns table(codename varchar, is_expense boolean, sum_ numeric)
 	as
 $$
-	select r.codename, sum(amount) as sum_ from record r
+	select r.codename, is_expense, sum(amount) as sum_ from record r
 		join category c on r.codename = c.codename
 		where created >= date_trunc(period_, now())
-		group by r.codename order by sum_ desc;
+		group by r.codename, is_expense order by sum_ desc;
 $$ language sql;
 select * from get_statistics_by_category('week');
 
