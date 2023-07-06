@@ -1,10 +1,28 @@
--- returns summary statistics for current specified period: year, month ...
--- or none
-create or replace function get_statistics(period_ varchar default 'month')
-	returns table(expenses numeric, incomes numeric, savings numeric, planned_savings numeric)
+/* 1
+returns stitstics by all categories in specified period: week, day, month, year
+or none, i.e. 0 rows
+*/
+create or replace function get_statistics_by_category(period_ varchar default 'month')
+	returns table(codename varchar, is_expense boolean, sum_ numeric)
 	as
 $$
-	select coalesce(expenses, 0) as expenses, coalesce(incomes, 0) as incomes,
+	select r.codename, is_expense, sum(amount) as sum_ from record r
+		join category c on r.codename = c.codename
+		where created >= date_trunc(period_, now())
+		group by r.codename, is_expense order by sum_ desc;
+$$ language sql;
+select * from get_statistics_by_category('week');
+
+/* 2
+returns summary statistics for current specified period: year, month ...
+or none
+*/
+create or replace function get_statistics(period_ varchar default 'month')
+	returns table(period_ varchar, expenses numeric, incomes numeric,
+                savings numeric, planned_savings numeric)
+	as
+$$
+	select period_, coalesce(expenses, 0) as expenses, coalesce(incomes, 0) as incomes,
 		   coalesce(savings, 0) as savings, coalesce(incomes * 0.15, 0) as planned_savings from
 		(select to_char(created, period_) as period_, sum(amount) as savings from record r
 			join category c on r.codename = c.codename
@@ -29,19 +47,6 @@ $$
 	using(period_);
 $$ language sql;
 select * from get_statistics('day');
-
--- returns stitstics by all categories in specified period: week, day, month, year
--- or none, i.e. 0 rows
-create or replace function get_statistics_by_category(period_ varchar default 'month')
-	returns table(codename varchar, is_expense boolean, sum_ numeric)
-	as
-$$
-	select r.codename, is_expense, sum(amount) as sum_ from record r
-		join category c on r.codename = c.codename
-		where created >= date_trunc(period_, now())
-		group by r.codename, is_expense order by sum_ desc;
-$$ language sql;
-select * from get_statistics_by_category('week');
 
 -----------------------------------------------------------------------------------------
 

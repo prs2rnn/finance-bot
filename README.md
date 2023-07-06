@@ -6,13 +6,13 @@ Rename `.env.example` to `.env` and fill the variables
 mv .env.example .env
 ```
 
-Change DSN variable in `config_data.py` file depending the way you wish to launch bot
+Change DSN variable in `.env` file depending the way you wish to launch bot
 
-```python
+```
 # localhost
-DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@localhost:5434/{getenv('DB_NAME')}"
+DSN="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5434/$DB_NAME"
 # docker
-DSN = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@postgres:5432/{getenv('DB_NAME')}"
+DSN="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$DB_NAME"
 ```
 
 The default way to use bot
