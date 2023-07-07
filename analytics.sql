@@ -1,7 +1,3 @@
-/*
-returns stitstics by all categories in specified period: week, day, month, year
-or none, i.e. 0 rows
-*/
 create or replace function get_statistics_by_category(period_ varchar default 'month')
 	returns table(codename varchar, is_expense boolean, sum_ numeric)
 	as
@@ -12,10 +8,6 @@ $$
 		group by r.codename, is_expense order by sum_ desc;
 $$ language sql;
 
-/*
-returns summary statistics for current specified period: year, month ...
-or none
-*/
 create or replace function get_statistics(period_ varchar default 'month')
 	returns table(period_ varchar, expenses numeric, incomes numeric,
                 savings numeric, planned_savings numeric)
@@ -73,11 +65,30 @@ $$
 	using (period_, year_);
 $$ language sql;
 
+create or replace function compare_cur_prev_by_categories
+	(year_ int default date_part('year', now()), period__ varchar default 'month')
+	returns table (codename_ varchar, prev numeric, cur numeric)
+	as
+$$
+begin
+	return query
+	with cur_prev as
+		(select * from get_categories_dynamic_statistics(year_, period__)
+			where period_ = date_part(period__, now())
+			or period_ = date_part(period__, now()) - 1 order by period_)
+	select codename, coalesce(prev.sum_, 0) as prev, coalesce(cur.sum_, 0) as cur from
+		(select * from cur_prev where period_ = (select min(period_) from cur_prev)) as prev
+	full join
+		(select * from cur_prev where period_ = (select max(period_) from cur_prev)) as cur
+	using(codename);
+end;
+$$ language plpgsql;
+
 ----------------------------------------------------------------------------------
 
 -- 1
 /*
-PARAMS: year, period_: 'month', 'week', 'day'
+PARAMS: year, period_: 'month', 'week', 'day', 'quarter'
 OUT:
 period_|year_|expenses |incomes |savings|planned_savings|
 -------+-----+---------+--------+-------+---------------+
@@ -86,3 +97,23 @@ period_|year_|expenses |incomes |savings|planned_savings|
 select * from get_dynamic_statistics();
 
 -- 2
+/*
+OUT:
+period_|year_|codename |sum_     |
+-------+-----+---------+---------+
+      1| 2023|barber   |  450.000|
+      2| 2023|barber   |  450.000|
+      1| 2023|business | 9390.000|
+*/
+select * from get_categories_dynamic_statistics();
+
+-- 3
+/*
+OUT:
+codename_|prev    |cur     |
+---------+--------+--------+
+mobile   | 300.000|       0|
+other    | 370.000|       0|
+pharmacy |2080.000|1400.000|
+*/
+select * from compare_cur_prev_by_categories(2023, 'month');
