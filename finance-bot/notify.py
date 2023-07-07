@@ -8,6 +8,7 @@ import httpx
 
 from config_data import ALLOWED_TELEGRAM_USER_IDS, DSN, TELEGRAM_BOT_TOKEN
 from database import Request, Statistics
+from telegram_logger import exception_logger, telegram_logger
 from vocabulary import VOCABULARY
 
 backup_path = Path(__file__).parent.joinpath("backup.csv")
@@ -44,6 +45,7 @@ async def notify(client: httpx.AsyncClient, id_: str, text: str) -> None:
                                         "text": VOCABULARY["backup_error"]})
 
 
+@exception_logger(telegram_logger)
 async def main() -> None:
     statisics, categories = await backup_db()
     text = VOCABULARY["notify_week"].format(
