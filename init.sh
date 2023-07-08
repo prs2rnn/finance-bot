@@ -36,6 +36,7 @@ values
     ('gift', 'prize, подарки', true),
     ('car', 'машина, авто, auto', true),
     ('housing', 'home, дом, жилье', true),
+    ('household', 'быт, уклад, life', true),
     ('subscription', 'подписка, sub', true),
     ('other', 'прочее, другое', true),
     ('salary', 'зп', false),
