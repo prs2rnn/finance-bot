@@ -37,6 +37,7 @@ values
     ('car', 'машина, авто, auto', true),
     ('housing', 'home, дом, жилье', true),
     ('household', 'быт, уклад, life', true),
+    ('electronics', 'technics', true),
     ('subscription', 'подписка, sub', true),
     ('other', 'прочее, другое', true),
     ('salary', 'зп', false),
