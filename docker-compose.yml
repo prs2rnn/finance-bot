@@ -18,11 +18,11 @@ services:
       - db:/var/lib/postgresql/data
       - ./init.sh:/docker-entrypoint-initdb.d/init.sh
 
-  # finance-bot:
-  #   container_name: myfinance-bot
-  #   build: ./
-  #   depends_on:
-  #     - postgres
+  finance-bot:
+    container_name: myfinance-bot
+    build: ./
+    depends_on:
+      - postgres
 
 volumes:
   db:
