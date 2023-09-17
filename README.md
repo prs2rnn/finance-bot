@@ -10,9 +10,9 @@ Change DSN variable in `.env` file depending the way you wish to launch bot
 
 ```
 # localhost
-DSN="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5434/$DB_NAME"
+DSN="postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5434/${DB_NAME}"
 # docker
-DSN="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$DB_NAME"
+DSN="postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}"
 ```
 
 The default way to use bot
