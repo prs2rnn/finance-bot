@@ -9,9 +9,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 aiogram = {git = "https://github.com/aiogram/aiogram.git", rev = "v3.0.0b7"}
-asyncpg = {git = "https://github.com/MagicStack/asyncpg.git", rev = "v0.27.0"}
 python-dotenv = {git = "https://github.com/theskumar/python-dotenv.git", rev = "v1.0.0"}
 httpx = {git = "https://github.com/encode/httpx.git", rev = "0.24.1"}
+asyncpg = "^0.28.0"
 
 
 [build-system]
